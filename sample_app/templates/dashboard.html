@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        .note-item {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .note-item li {
+            margin-right: 10px;
+        }
+
+        .selection-item {
+            display: flex;
+            align-items: center;
+            margin-top: -20px;
+        }
+
+        .selection-item p {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Hello {{ db.get_username(userId) }}, you are logged in.</h1>
+    <a href="{{url_for('logout')}}">Press here to logout</a>
+
+    <h2>Write a new note</h2>
+    <form method="POST" action="{{ url_for('dashboard', userId=userId) }}">
+        {{ addForm.hidden_tag() }}
+        {{ addForm.note }}
+        {{ addForm.submit }}
+    </form>
+
+    <h2>Existing notes</h2>
+    <ul>
+        {% for item in db.get_notes_by_user() %}
+        <div class="note-item">
+            <li>{{ item.text }}</li>
+            <form method="POST" action="{{ url_for('dashboard', userId=userId, selected_noteId=item.id) }}">
+                <button type="submit">Select</button>
+            </form>
+        </div>
+        {% endfor %}
+    </ul>
+
+    <h2>Selected Note</h2>
+    {% if selected_noteId >= 0 %}
+        <div class="selection-item">
+            <p>{{ db.get_note_by_id(selected_noteId).text }}</p>
+            <form method="POST" action="{{ url_for('delete_note', note_id=selected_noteId) }}">
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+        <form method="POST" action="{{ url_for('dashboard', userId=userId, selected_noteId=selected_noteId) }}">
+            {{ shareForm.hidden_tag() }}
+            {{ shareForm.user }}
+            {{ shareForm.submit }}
+        </form>
+    {% endif %}
+
+</body>
+
+</html>
